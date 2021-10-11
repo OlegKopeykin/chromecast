@@ -64,8 +64,7 @@ public class QueueDataProvider {
         mRepeatMode = MediaStatus.REPEAT_MODE_REPEAT_OFF;
         mShuffle = false;
         mCurrentIem = null;
-        CastContext.getSharedInstance(mAppContext).getSessionManager().addSessionManagerListener(
-                mSessionManagerListener, CastSession.class);
+        CastContext.getSharedInstance(mAppContext).getSessionManager().addSessionManagerListener(mSessionManagerListener, CastSession.class);
         syncWithRemoteQueue();
     }
 

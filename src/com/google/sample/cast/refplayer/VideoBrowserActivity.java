@@ -27,6 +27,8 @@ import com.google.sample.cast.refplayer.queue.ui.QueueListViewActivity;
 import com.google.sample.cast.refplayer.settings.CastPreference;
 
 import android.content.Intent;
+import android.graphics.PixelFormat;
+import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,6 +40,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 /**
  * The main activity that displays the list of videos.
@@ -116,12 +119,22 @@ public class VideoBrowserActivity extends AppCompatActivity {
         mCastStateListener = new CastStateListener() {
             @Override
             public void onCastStateChanged(int newState) {
-                if (newState != CastState.NO_DEVICES_AVAILABLE) {
-                    showIntroductoryOverlay();
-                }
+            if (newState != CastState.NO_DEVICES_AVAILABLE) {
+                showIntroductoryOverlay();
+            }
             }
         };
         mCastContext = CastContext.getSharedInstance(this);
+
+        //MediaController mediaController = new MediaController(this);
+        //mediaController.setVisibility(View.GONE);
+        //mediaController.setAnchorView(videoView);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getWindow().setFormat(PixelFormat.RGB_565);
     }
 
     private void setupActionBar() {
@@ -132,7 +145,7 @@ public class VideoBrowserActivity extends AppCompatActivity {
     private void intentToJoin(){
         Intent intent = getIntent();
         Uri intentToJoinUri = Uri.parse("https://castvideos.com/cast/join");
-        Log.i(TAG, "URI passed: "+intentToJoinUri);
+        Log.i(TAG, "URI passed: "+ intentToJoinUri);
 
         if (intent.getData() != null && intent.getData().equals(intentToJoinUri)) {
             mCastContext.getSessionManager().startSession(intent);
@@ -144,8 +157,7 @@ public class VideoBrowserActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.browse, menu);
-        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
-                R.id.media_route_menu_item);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
         mQueueMenuItem = menu.findItem(R.id.action_show_queue);
         showIntroductoryOverlay();
         return true;
@@ -153,8 +165,7 @@ public class VideoBrowserActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_show_queue).setVisible(
-                (mCastSession != null) && mCastSession.isConnected());
+        menu.findItem(R.id.action_show_queue).setVisible((mCastSession != null) && mCastSession.isConnected());
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -173,19 +184,16 @@ public class VideoBrowserActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
-        return mCastContext.onDispatchVolumeKeyEventBeforeJellyBean(event)
-                || super.dispatchKeyEvent(event);
+        return mCastContext.onDispatchVolumeKeyEventBeforeJellyBean(event) || super.dispatchKeyEvent(event);
     }
 
     @Override
     protected void onResume() {
         mCastContext.addCastStateListener(mCastStateListener);
-        mCastContext.getSessionManager().addSessionManagerListener(
-                mSessionManagerListener, CastSession.class);
-        intentToJoin();
+        mCastContext.getSessionManager().addSessionManagerListener(mSessionManagerListener, CastSession.class);
+        //intentToJoin();
         if (mCastSession == null) {
-            mCastSession = CastContext.getSharedInstance(this).getSessionManager()
-                    .getCurrentCastSession();
+            mCastSession = CastContext.getSharedInstance(this).getSessionManager().getCurrentCastSession();
         }
         if (mQueueMenuItem != null) {
             mQueueMenuItem.setVisible(

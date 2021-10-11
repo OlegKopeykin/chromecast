@@ -50,6 +50,7 @@ public class VideoItemLoader extends AsyncTaskLoader<List<MediaInfo>> {
     @Override
     protected void onStartLoading() {
         super.onStartLoading();
+        Log.e(TAG, "onStartLoading");
         forceLoad();
     }
 
@@ -58,6 +59,7 @@ public class VideoItemLoader extends AsyncTaskLoader<List<MediaInfo>> {
      */
     @Override
     protected void onStopLoading() {
+        Log.e(TAG, "onStopLoading");
         // Attempt to cancel the current load task if possible.
         cancelLoad();
     }

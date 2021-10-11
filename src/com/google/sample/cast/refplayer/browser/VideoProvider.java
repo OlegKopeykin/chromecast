@@ -81,8 +81,7 @@ public class VideoProvider {
             java.net.URL url = new java.net.URL(urlString);
             URLConnection urlConnection = url.openConnection();
             is = new BufferedInputStream(urlConnection.getInputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    urlConnection.getInputStream(), "iso-8859-1"), 1024);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "iso-8859-1"), 1024);
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -111,16 +110,20 @@ public class VideoProvider {
         }
         Map<String, String> urlPrefixMap = new HashMap<>();
         mediaList = new ArrayList<>();
+        String urlGood = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/hls/GoogleIO-2014-MakingGoogleCastReadyAppsDiscoverable.m3u8";
+        String urlYoBad = "https://cdn.dev.yomobile.xyz/test/hls/c35ce4c4-d8a9-49ea-98a3-b98f99d4b8d4/master.m3u8";
+        String urlSample = "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/hls/DesigningForGoogleCast.m3u8";
+        String urlForTest = urlGood;
         JSONObject jsonObj = new VideoProvider().parseUrl(url);
         JSONArray categories = jsonObj.getJSONArray(TAG_CATEGORIES);
         if (null != categories) {
             for (int i = 0; i < categories.length(); i++) {
                 JSONObject category = categories.getJSONObject(i);
                 urlPrefixMap.put(TAG_HLS, category.getString(TAG_HLS));
-                urlPrefixMap.put(TAG_DASH, category.getString(TAG_DASH));
-                urlPrefixMap.put(TAG_MP4, category.getString(TAG_MP4));
+                //urlPrefixMap.put(TAG_DASH, category.getString(TAG_DASH));
+                //urlPrefixMap.put(TAG_MP4, category.getString(TAG_MP4));
                 urlPrefixMap.put(TAG_IMAGES, category.getString(TAG_IMAGES));
-                urlPrefixMap.put(TAG_TRACKS, category.getString(TAG_TRACKS));
+                //urlPrefixMap.put(TAG_TRACKS, category.getString(TAG_TRACKS));
                 category.getString(TAG_NAME);
                 JSONArray videos = category.getJSONArray(TAG_VIDEOS);
                 if (null != videos) {
@@ -135,9 +138,8 @@ public class VideoProvider {
                         }
                         for (int k = 0; k < videoSpecs.length(); k++) {
                             JSONObject videoSpec = videoSpecs.getJSONObject(k);
-                            if (TARGET_FORMAT.equals(videoSpec.getString(TAG_VIDEO_TYPE))) {
-                                videoUrl = urlPrefixMap.get(TARGET_FORMAT) + videoSpec
-                                        .getString(TAG_VIDEO_URL);
+                            if (TAG_HLS.equals(videoSpec.getString(TAG_VIDEO_TYPE))) {
+                                videoUrl = urlForTest;//todo urlPrefixMap.get(TARGET_FORMAT) + videoSpec.getString(TAG_VIDEO_URL);
                                 mimeType = videoSpec.getString(TAG_VIDEO_MIME);
                             }
                         }
@@ -145,31 +147,29 @@ public class VideoProvider {
                             continue;
                         }
                         String imageUrl = urlPrefixMap.get(TAG_IMAGES) + video.getString(TAG_THUMB);
-                        String bigImageUrl = urlPrefixMap.get(TAG_IMAGES) + video
-                                .getString(TAG_IMG_780_1200);
+                        String bigImageUrl = urlPrefixMap.get(TAG_IMAGES) + video.getString(TAG_IMG_780_1200);
                         String title = video.getString(TAG_TITLE);
                         String studio = video.getString(TAG_STUDIO);
                         int duration = video.getInt(TAG_DURATION);
                         List<MediaTrack> tracks = null;
-                        if (video.has(TAG_TRACKS)) {
-                            JSONArray tracksArray = video.getJSONArray(TAG_TRACKS);
-                            if (tracksArray != null) {
-                                tracks = new ArrayList<>();
-                                for (int k = 0; k < tracksArray.length(); k++) {
-                                    JSONObject track = tracksArray.getJSONObject(k);
-                                    tracks.add(buildTrack(track.getLong(TAG_TRACK_ID),
-                                            track.getString(TAG_TRACK_TYPE),
-                                            track.getString(TAG_TRACK_SUBTYPE),
-                                            urlPrefixMap.get(TAG_TRACKS) + track
-                                                    .getString(TAG_TRACK_CONTENT_ID),
-                                            track.getString(TAG_TRACK_NAME),
-                                            track.getString(TAG_TRACK_LANGUAGE)
-                                    ));
-                                }
-                            }
-                        }
-                        mediaList.add(buildMediaInfo(title, studio, subTitle, duration, videoUrl,
-                                mimeType, imageUrl, bigImageUrl, tracks));
+//                        if (video.has(TAG_TRACKS)) {
+//                            JSONArray tracksArray = video.getJSONArray(TAG_TRACKS);
+//                            if (tracksArray != null) {
+//                                tracks = new ArrayList<>();
+//                                for (int k = 0; k < tracksArray.length(); k++) {
+//                                    JSONObject track = tracksArray.getJSONObject(k);
+//                                    tracks.add(buildTrack(track.getLong(TAG_TRACK_ID),
+//                                            track.getString(TAG_TRACK_TYPE),
+//                                            track.getString(TAG_TRACK_SUBTYPE),
+//                                            urlPrefixMap.get(TAG_TRACKS) + track
+//                                                    .getString(TAG_TRACK_CONTENT_ID),
+//                                            track.getString(TAG_TRACK_NAME),
+//                                            track.getString(TAG_TRACK_LANGUAGE)
+//                                    ));
+//                                }
+//                            }
+//                        }
+                        mediaList.add(buildMediaInfo(title, studio, subTitle, duration, videoUrl, mimeType, imageUrl, bigImageUrl, tracks));
                     }
                 }
             }
@@ -177,9 +177,15 @@ public class VideoProvider {
         return mediaList;
     }
 
-    private static MediaInfo buildMediaInfo(String title, String studio, String subTitle,
-            int duration, String url, String mimeType, String imgUrl, String bigImageUrl,
-            List<MediaTrack> tracks) {
+    private static MediaInfo buildMediaInfo(String title,
+                                            String studio,
+                                            String subTitle,
+                                            int duration,
+                                            String url,
+                                            String mimeType,
+                                            String imgUrl,
+                                            String bigImageUrl,
+                                            List<MediaTrack> tracks) {
         MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 
         movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, studio);
@@ -187,20 +193,20 @@ public class VideoProvider {
         movieMetadata.addImage(new WebImage(Uri.parse(imgUrl)));
         movieMetadata.addImage(new WebImage(Uri.parse(bigImageUrl)));
         JSONObject jsonObj = null;
-        try {
-            jsonObj = new JSONObject();
-            jsonObj.put(KEY_DESCRIPTION, subTitle);
-        } catch (JSONException e) {
-            Log.e(TAG, "Failed to add description to the json object", e);
-        }
+//        try {
+//            jsonObj = new JSONObject();
+//            jsonObj.put(KEY_DESCRIPTION, subTitle);
+//        } catch (JSONException e) {
+//            Log.e(TAG, "Failed to add description to the json object", e);
+//        }
 
         return new MediaInfo.Builder(url)
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(mimeType)
                 .setMetadata(movieMetadata)
-                .setMediaTracks(tracks)
-                .setStreamDuration(duration * 1000)
-                .setCustomData(jsonObj)
+                //.setMediaTracks(tracks)
+                //.setStreamDuration(duration * 1000)
+                //.setCustomData(jsonObj)
                 .build();
     }
 

@@ -512,8 +512,7 @@ public class LocalPlayerActivity extends AppCompatActivity {
 
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                Log.e(TAG, "OnErrorListener.onError(): VideoView encountered an "
-                        + "error, what: " + what + ", extra: " + extra);
+                Log.e(TAG, "OnErrorListener.onError(): VideoView encountered an " + "error, what: " + what + ", extra: " + extra);
                 String msg;
                 if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
                     msg = getString(R.string.video_error_media_load_timeout);
@@ -531,7 +530,6 @@ public class LocalPlayerActivity extends AppCompatActivity {
         });
 
         mVideoView.setOnPreparedListener(new OnPreparedListener() {
-
             @Override
             public void onPrepared(MediaPlayer mp) {
                 Log.d(TAG, "onPrepared is reached");
@@ -539,6 +537,14 @@ public class LocalPlayerActivity extends AppCompatActivity {
                 mEndText.setText(Utils.formatMillis(mDuration));
                 mSeekbar.setMax(mDuration);
                 restartTrickplayTimer();
+            }
+        });
+
+        mVideoView.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                Log.e(TAG, "setOnInfoListener: VideoView what: " + what + ", extra: " + extra);
+                return false;
             }
         });
 
@@ -585,8 +591,7 @@ public class LocalPlayerActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                    boolean fromUser) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mStartText.setText(Utils.formatMillis(progress));
             }
         });
@@ -595,9 +600,9 @@ public class LocalPlayerActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if (mLocation == PlaybackLocation.LOCAL) {
-                    togglePlayback();
-                }
+            if (mLocation == PlaybackLocation.LOCAL) {
+                togglePlayback();
+            }
             }
         });
     }
@@ -661,10 +666,8 @@ public class LocalPlayerActivity extends AppCompatActivity {
             mContainer.setBackgroundColor(getResources().getColor(R.color.black));
 
         } else {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-            getWindow().clearFlags(
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             }
@@ -680,16 +683,13 @@ public class LocalPlayerActivity extends AppCompatActivity {
             mTitleView.setVisibility(View.GONE);
             mAuthorView.setVisibility(View.GONE);
             displaySize = Utils.getDisplaySize(this);
-            RelativeLayout.LayoutParams lp = new
-                    RelativeLayout.LayoutParams(displaySize.x,
-                    displaySize.y + getSupportActionBar().getHeight());
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(displaySize.x, displaySize.y + getSupportActionBar().getHeight());
             lp.addRule(RelativeLayout.CENTER_IN_PARENT);
             mVideoView.setLayoutParams(lp);
             mVideoView.invalidate();
         } else {
             MediaMetadata mm = mSelectedMedia.getMetadata();
-            mDescriptionView.setText(mSelectedMedia.getCustomData().optString(
-                    VideoProvider.KEY_DESCRIPTION));
+            //mDescriptionView.setText(mSelectedMedia.getCustomData().optString(VideoProvider.KEY_DESCRIPTION));
             mTitleView.setText(mm.getString(MediaMetadata.KEY_TITLE));
             mAuthorView.setText(mm.getString(MediaMetadata.KEY_SUBTITLE));
             mDescriptionView.setVisibility(View.VISIBLE);
@@ -709,16 +709,14 @@ public class LocalPlayerActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.player, menu);
-        CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
-                R.id.media_route_menu_item);
+        CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
         mQueueMenuItem = menu.findItem(R.id.action_show_queue);
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_show_queue).setVisible(
-                (mCastSession != null) && mCastSession.isConnected());
+        menu.findItem(R.id.action_show_queue).setVisible((mCastSession != null) && mCastSession.isConnected());
         return super.onPrepareOptionsMenu(menu);
     }
 

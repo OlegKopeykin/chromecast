@@ -181,17 +181,13 @@ public class Utils {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 QueueDataProvider provider = QueueDataProvider.getInstance(context);
-                MediaQueueItem queueItem = new MediaQueueItem.Builder(mediaInfo).setAutoplay(
-                        true).setPreloadTime(PRELOAD_TIME_S).build();
+                MediaQueueItem queueItem = new MediaQueueItem.Builder(mediaInfo).setAutoplay(true).setPreloadTime(PRELOAD_TIME_S).build();
                 MediaQueueItem[] newItemArray = new MediaQueueItem[]{queueItem};
                 String toastMessage = null;
                 if (provider.isQueueDetached() && provider.getCount() > 0) {
-                    if ((menuItem.getItemId() == R.id.action_play_now)
-                            || (menuItem.getItemId() == R.id.action_add_to_queue)) {
-                        MediaQueueItem[] items = Utils
-                                .rebuildQueueAndAppend(provider.getItems(), queueItem);
-                        remoteMediaClient.queueLoad(items, provider.getCount(),
-                                MediaStatus.REPEAT_MODE_REPEAT_OFF, null);
+                    if ((menuItem.getItemId() == R.id.action_play_now) || (menuItem.getItemId() == R.id.action_add_to_queue)) {
+                        MediaQueueItem[] items = Utils.rebuildQueueAndAppend(provider.getItems(), queueItem);
+                        remoteMediaClient.queueLoad(items, provider.getCount(), MediaStatus.REPEAT_MODE_REPEAT_OFF, null);
                     } else {
                         return false;
                     }
